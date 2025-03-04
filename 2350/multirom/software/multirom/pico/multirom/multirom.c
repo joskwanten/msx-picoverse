@@ -698,7 +698,7 @@ void __no_inline_not_in_flash_func(loadrom_neo16)(uint32_t offset)
 // Main function running on core 0
 int __no_inline_not_in_flash_func(main)()
 {
-    
+   
     stdio_init_all();     // Initialize stdio
     setup_gpio();     // Initialize GPIO
 

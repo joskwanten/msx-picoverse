@@ -121,7 +121,6 @@ void delay_ms (uint16_t milliseconds)
 uint8_t getManufacturerID() 
 {
     write_command(0x03);
-    //delay_ms(50);
     return read_status();
 }
 
@@ -180,14 +179,14 @@ bool sd_disk_read (uint8_t nr_sectors,uint8_t* lba,uint8_t* sector_buffer)
     uint8_t x = 1;
 
     //printf("LBA: %02X %02X %02X %02X\r\n", lba[0], lba[1], lba[2], lba[3]);
-    //delay_ms(50);
+    delay_ms(50);
     write_command(0x06);
-    //delay_ms(20);
+    delay_ms(40);
     write_command(lba[3]);
     write_command(lba[2]);
     write_command(lba[1]);
     write_command(lba[0]);
-    //delay_ms(20);
+    delay_ms(40);
     write_command(0x06);
     delay_ms(50); // read from sd is expensive
     for (uint16_t i = 0; i < 512; i++) {
@@ -212,21 +211,37 @@ bool sd_disk_read (uint8_t nr_sectors,uint8_t* lba,uint8_t* sector_buffer)
 
 bool sd_disk_write (uint8_t nr_sectors,uint8_t* lba,uint8_t* sector_buffer)
 {
-    printf("Writing %d sectors\r\n",nr_sectors);
-    //printf("LBA: %02X %02X %02X %02X\r\n",lba[0],lba[1],lba[2],lba[3]);
+    uint8_t x = 1;
+    uint16_t offset = 0;
 
-    //delay_ms(50);
+    printf("Writing %d sectors\r\n",nr_sectors);
+    //printf("LBA: %02X%02X%02X%02X\r\n",lba[3],lba[2],lba[1],lba[0]);
+
+    delay_ms(50);
     write_command(0x08);
-    //delay_ms(80);
+    delay_ms(40);
     write_command (lba[3]);
     write_command (lba[2]);
     write_command (lba[1]);
     write_command (lba[0]);
-    //delay_ms(80);
+    delay_ms(40);
     write_command(0x08);
-    delay_ms(50);
     for (uint16_t i = 0; i < 512; i++) {
-        write_data(sector_buffer[i]);
+        write_data(sector_buffer[offset+i]);
+    }
+    delay_ms(50);
+    offset += 512;
+    printf("Wrote sector %d\r\n", x++);
+
+    while (nr_sectors > 1) {
+        write_command(0x09);
+        for (uint16_t i = 0; i < 512; i++) {
+            write_data(sector_buffer[offset+i]);
+        }
+        delay_ms(50);
+        offset += 512;
+        printf("Wrote sector %d\r\n", x++);
+        nr_sectors--;
     }
 
     return true;

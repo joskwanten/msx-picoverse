@@ -26,8 +26,6 @@ void __not_in_flash_func(io_main)(){
     DSTATUS ds = 1; // Disk status (1 = not initialized)
 
     while (true) {
-        
-        
 
         bool iorq  = !gpio_get(PIN_IORQ);
         bool sltsl = !gpio_get(PIN_SLTSL);
@@ -153,13 +151,9 @@ void __not_in_flash_func(io_main)(){
                                     break;
                                 }
                                 else {
-                                    //printf("Sending 4 bytes of SD card capacity: %d\n", capacity);
                                     data_to_send = 4;        // 4 bytes (32 bits)
                                     data_byte_index = 0;     // Reset index
                                     memcpy(data_buffer, &capacity, 4); // Copy capacity to data buffer
-                                    //for (int i = 0; i < 4; i++) {
-                                    //    printf("data_buffer[%d]: %d\n", i, data_buffer[i]);
-                                   // }
                                 }
                             }
 
@@ -197,18 +191,6 @@ void __not_in_flash_func(io_main)(){
                                     data_byte_index = 0; // Reset index
                                     block_read = false; // Reset block read flag
 
-                                    // debug print the data buffer
-                                    //printf("MSX: SD card block data for block %d:\n", block_address);
-                                    /*for (int i = 0; i < 512; i += 16) {
-                                        // Print the address (in hexadecimal, 4 digits)
-                                       printf("%04X: ", i);
-                                        // Print 16 bytes per line
-                                        for (int j = 0; j < 16; j++) {
-                                                printf("%02X ", data_buffer[i + j]);
-                                        }
-                                        printf("\n");
-                                    }*/
-
                                 }
                             }
                         }
@@ -235,18 +217,6 @@ void __not_in_flash_func(io_main)(){
                             else {
                                 data_to_send = 512; // Set data to send to 512 bytes (4096 bits)
                                 data_byte_index = 0; // Reset index
-
-                                 // debug print the data buffer
-                                 //printf("MSX: SD card block data for block %d:\n", block_address);
-                                 //for (int i = 0; i < 512; i += 16) {
-                                     // Print the address (in hexadecimal, 4 digits)
-                                     //printf("%04X: ", i);
-                                     // Print 16 bytes per line
-                                     //for (int j = 0; j < 16; j++) {
-                                     //        printf("%02X ", data_buffer[i + j]);
-                                    // }
-                                    // printf("\n");
-                                // }
                             }
                         }
                         else {
@@ -261,15 +231,12 @@ void __not_in_flash_func(io_main)(){
                             if (!block_write) {
                                 // On the first call, set the ctrl_to_receive to 4 as we are expecting 4 bytes (32 bits)
                                 // for the address of the block to write to the SD card
-                                // set the data_to_send to 4 bytes (32 bits)
-                                //printf("First call, will collect the address to write to the SD card\n");
                                 ctrl_to_receive = 4;
                             }
                             else
                             {
-                                //printf("Lets write the sector to the microSD card\n");
-                                //printf("Now you need to transfer the buffer using port 0x9f\n");
-                                block_write = true;
+                                //now we have the lba address
+                                // block_write is already true because it was set up there on the control for the address
                                 data_to_receive = 512; // Set data to send to 512 bytes (4096 bits)
                                 data_byte_index = 0; // Reset index
                             }
@@ -280,42 +247,47 @@ void __not_in_flash_func(io_main)(){
                             ctrl_reg = 0xFF;
                         }
                     }
-                    
+
+                    // 0x09 = Write the next 512 byte block to the SD card
+                    // can only be executed after the 0x08 command
+                    if (busdata == 0x09) {
+                        if (!(ds & STA_NOINIT)) {
+                            block_address++;
+                            data_to_receive = 512; // Set data to send to 512 bytes (4096 bits)
+                            data_byte_index = 0; // Reset index
+                            block_write = true; // Set block write flag
+                              
+                        }
+                        else {
+                            // SD card not present or not initialized
+                            ctrl_reg = 0xFF;
+                        }
+                    }
                 }
                 else if (port == 0x9F) // Port 0x9F (Data Write): Send the byte to the media
                 {
                     if (!(ds & STA_NOINIT)) {
                         //we are receiving an out on port 0x9f to receive data from the MSX and write to SD card
                         if (data_to_receive > 0) {
-                            data_buffer[data_byte_index] = busdata; // Store the data in the buffer
-                            //printf("Index: %d, Data: 0x%02x\n", data_byte_index, busdata);
+                            //data_buffer[data_byte_index] = busdata; // Store the data in the buffer
+                            data_buffer[data_byte_index] = (gpio_get_all() >> 16) & 0xFF;
                             data_byte_index++; // Increment the buffer index
                             data_to_receive--; // Decrement the data to receive
                         }
 
                         // if we don't have any more data to receive, and the buffer is full, write the block to the SD card
                         if ((data_to_receive == 0) && (block_write)) {
-                                printf("MSX: Writing block %d to SD card\n", block_address);
-                                /*printf("Data buffer to write to SD card:\n");
-                                for (int i = 0; i < 512; i += 16) {
-                                        // Print the address (in hexadecimal, 4 digits)
-                                       printf("%04X: ", i);
-                                        // Print 16 bytes per line
-                                        for (int j = 0; j < 16; j++) {
-                                                printf("%02X ", data_buffer[i + j]);
-                                        }
-                                        printf("\n");
-                                    }*/
-                                DRESULT dr = disk_write(pdrv, (BYTE*)data_buffer, block_address, 1); // Write one sector to the SD card
-                                if (dr != RES_OK) {
-                                    // If there is an error, signal error and reset index.
-                                    ctrl_reg = 0xFF;
-                                }
-                                block_write = false; // Reset block read flag
+                            DRESULT dr = disk_write(pdrv, (BYTE*)data_buffer, block_address, 1); // Write one sector to the SD card
+                            if (dr != RES_OK) {
+                                // If there is an error, signal error and reset index.
+                                ctrl_reg = 0xFF;
                             }
+                            data_byte_index = 0; // Reset data byte index
+                            data_to_receive = 0; // Reset data to receive
+                            block_write = false; // Reset block read flag
+                            block_read = false; // Reset block write flag
+                        }
                         
-                        //printf("MSX Write 0x9F: Data Sent=0x%02x, Received=0x%02x\n", data_reg, spi_handle_data_register(data_reg, true));
-                        //printf("MSX Write 0x9F: Data Sent to microSD=0x%02x, Received=0x%02x\n", spi_tx, spi_rx);
                     }
 
                 }
@@ -363,12 +335,12 @@ void __not_in_flash_func(io_main)(){
                     gpio_put_masked(0xFF0000, out_val << 16); // Write the data to the data bus
                     while (!gpio_get(PIN_RD)) tight_loop_contents();
                     gpio_set_dir_in_masked(0xFF << 16); // Return data bus to input mode after cycle completes
-
                 }
 
             }
+            while (!gpio_get(PIN_SLTSL)) tight_loop_contents();
         }
-        tight_loop_contents();
+    tight_loop_contents();
     }
 }
 
