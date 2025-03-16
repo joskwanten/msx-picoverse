@@ -33,6 +33,77 @@ void hal_deinit ()
     // nothing to do
 }
 
+
+
+uint8_t read_ctrl() __z88dk_fastcall __naked
+{
+    __asm
+        ld a,(0x7B00)
+        ld l,a
+        ret
+    __endasm;
+}
+
+void write_ctrl (uint8_t data)  __z88dk_fastcall __naked
+{
+    __asm
+        ld a,l
+        ld (0x7B00), a
+        ret
+    __endasm;
+}
+
+uint8_t read_mnft() __z88dk_fastcall __naked
+{
+    __asm
+        ld a,(0x7B01)
+        ld l,a
+        ret
+    __endasm;
+}
+
+void write_mnft (uint8_t data)  __z88dk_fastcall __naked
+{
+    __asm
+        ld a,l
+        ld (0x7B01), a
+        ret
+    __endasm;
+}
+
+uint8_t read_8bit_value(uint16_t address) {
+    uint8_t value = 0;
+    uint8_t *ptr = (uint8_t *)address;
+    value = *ptr;
+    return value;
+}
+
+uint32_t read_32bit_value(uint16_t address) {
+    uint32_t value = 0;
+    uint8_t *ptr = (uint8_t *)address;
+
+    value |= (uint32_t)ptr[0] << 24;
+    value |= (uint32_t)ptr[1] << 16;
+    value |= (uint32_t)ptr[2] << 8;
+    value |= (uint32_t)ptr[3];
+
+    return value;
+}
+
+void write_8bit_value(uint16_t address, uint8_t value) {
+    uint8_t *ptr = (uint8_t *)address;
+    *ptr = value;
+}
+
+void write_32bit_value(uint16_t address, uint32_t value) {
+    uint8_t *ptr = (uint8_t *)address;
+
+    ptr[0] = (value >> 24) & 0xFF;
+    ptr[1] = (value >> 16) & 0xFF;
+    ptr[2] = (value >> 8) & 0xFF;
+    ptr[3] = value & 0xFF;
+}
+
 void write_command (uint8_t command)  __z88dk_fastcall __naked
 {
     __asm
@@ -121,34 +192,25 @@ void delay_ms (uint16_t milliseconds)
 uint8_t getManufacturerID() 
 {
     write_command(0x03);
-    return read_status();
+    return read_data();
 }
 
 uint32_t getSDCapacity() 
 {
-    uint32_t sd_capacity;
-    sd_capacity = 0;
+    uint32_t sd_capacity = 0;
     write_command(0x05); 
-    for (uint8_t i=0;i<4;i++)
+    delay_ms(50); 
+    for (uint8_t i = 0; i < 4; i++)
     {
-       delay_ms(60);
-       uint8_t byte = read_status();
-       sd_capacity |= (uint32_t)byte<<(8 * i);
+        uint8_t byte = read_data();
+        sd_capacity |= (uint32_t)byte << (i * 8);
     }
     return sd_capacity;
 }
 
 uint32_t getSDSerial() 
 {
-    uint32_t sd_serial;
-    sd_serial = 0;
-    write_command(0x04); 
-    for (uint8_t i=0;i<4;i++)
-    {
-        delay_ms(60);
-        uint8_t byte = read_status();
-        sd_serial |= (uint32_t)byte<<(8 * i);
-    }
+    uint32_t sd_serial = 0x12345678;
     return sd_serial;
 }
 
@@ -168,81 +230,162 @@ bool read_write_disk_sectors (bool writing,uint8_t nr_sectors,uint32_t* sector,u
     return true;
 }
 
-
 bool sd_disk_read (uint8_t nr_sectors,uint8_t* lba,uint8_t* sector_buffer)
 {
-    //printf("Reading %d sectors\r\n", nr_sectors);
+    //printf("Read %d block(s): ", nr_sectors);
 
     uint8_t nr = nr_sectors;
     uint16_t offset = 0;
-
     uint8_t x = 1;
 
-    //printf("LBA: %02X %02X %02X %02X\r\n", lba[0], lba[1], lba[2], lba[3]);
-    delay_ms(50);
+    //printf("LBA %02X%02X%02X%02X: \r\n", lba[0],lba[1],lba[2],lba[3]);
+    //delay_ms(50);
     write_command(0x06);
-    delay_ms(40);
-    write_command(lba[3]);
-    write_command(lba[2]);
-    write_command(lba[1]);
-    write_command(lba[0]);
-    delay_ms(40);
+    //delay_ms(40);
+    write_data(lba[0]);
+    write_data(lba[1]);
+    write_data(lba[2]);
+    write_data(lba[3]);
+    //delay_ms(40);
     write_command(0x06);
     delay_ms(50); // read from sd is expensive
-    for (uint16_t i = 0; i < 512; i++) {
-        sector_buffer[offset + i] = read_data();
+
+    uint16_t chunk = 0;
+    while (chunk < 512) {
+        read_data_multiple(sector_buffer, 32);
+        sector_buffer += 32;
+        chunk += 32;
     }
-    offset += 512;
-    //printf("Read sector %d\r\n", x++);
+
+    //printf("%d ", x++);
 
     while (nr > 1) {
         write_command(0x07);
         delay_ms(50); // read from sd is expensive
-        for (uint16_t i = 0; i < 512; i++) {
-            sector_buffer[offset + i] = read_data();
+        chunk = 0;
+        while (chunk < 512) {
+            read_data_multiple(sector_buffer, 32);
+            sector_buffer += 32;
+            chunk += 32;
         }
-        offset += 512;
-        //printf("Read sector %d\r\n", x++);
+        //printf("%d ", x++);
         nr--;
     }
+
+    //printf("\r\n");
+    return true;
+}
+
+bool sd_disk_write(uint8_t nr_sectors,uint8_t* lba,uint8_t* sector_buffer)
+{
+    //printf("Write %d sectors: ", nr_sectors);
+
+    //printf("LBA %02X%02X%02X%02X: \r\n", lba[3],lba[2],lba[1],lba[0]);
+
+    uint8_t x = 1;
+    uint16_t offset = 0;
+    uint8_t nr = nr_sectors;
+
+    //delay_ms(50);
+    write_command(0x08);
+    //delay_ms(40);
+    write_data (lba[0]);
+    write_data (lba[1]);
+    write_data (lba[2]);
+    write_data (lba[3]);
+    //delay_ms(40);
+    write_command(0x08);
+
+    uint16_t chunk = 0;
+    while (chunk < 512) {
+            write_data_multiple(sector_buffer, 32);
+            sector_buffer += 32;
+            chunk += 32;
+    }
+    delay_ms(50);
+    //printf("%d ", x++);
+
+    //for (uint16_t i = 0; i < 512; i++) {
+    //   write_data(sector_buffer[offset+i]);
+    //}
+    //offset += 512;
+    //printf("%d ", x++);
+
+    while (nr > 1) {
+        write_command(0x09);
+        chunk = 0;
+        while (chunk < 512) {
+            write_data_multiple(sector_buffer, 32);
+            sector_buffer += 32;
+            chunk += 32;
+        }
+        delay_ms(50);
+        printf("%d ", x++);
+
+        //for (uint16_t i = 0; i < 512; i++) {
+        //    write_data(sector_buffer[offset+i]);
+        //}
+        //offset += 512;
+        nr--;
+    }
+
+    //printf("\r\n");
 
     return true;
 }
 
-bool sd_disk_write (uint8_t nr_sectors,uint8_t* lba,uint8_t* sector_buffer)
+
+bool sd_disk_write_old (uint8_t nr_sectors,uint8_t* lba,uint8_t* sector_buffer)
 {
+    printf("Write %d sectors: ", nr_sectors);
+
     uint8_t x = 1;
     uint16_t offset = 0;
+    uint8_t nr = nr_sectors;
 
-    printf("Writing %d sectors\r\n",nr_sectors);
-    //printf("LBA: %02X%02X%02X%02X\r\n",lba[3],lba[2],lba[1],lba[0]);
+    //delay_ms(50);
+    write_command(0x08);
+    //delay_ms(40);
+    write_data (lba[0]);
+    write_data (lba[1]);
+    write_data (lba[2]);
+    write_data (lba[3]);
+    //delay_ms(40);
+    write_command(0x08);
 
-    delay_ms(50);
-    write_command(0x08);
-    delay_ms(40);
-    write_command (lba[3]);
-    write_command (lba[2]);
-    write_command (lba[1]);
-    write_command (lba[0]);
-    delay_ms(40);
-    write_command(0x08);
-    for (uint16_t i = 0; i < 512; i++) {
-        write_data(sector_buffer[offset+i]);
+    uint16_t chunk = 0;
+    while (chunk < 512) {
+            write_data_multiple(sector_buffer, 32);
+            sector_buffer += 32;
+            chunk += 32;
     }
     delay_ms(50);
-    offset += 512;
-    printf("Wrote sector %d\r\n", x++);
+    printf("%d ", x++);
 
-    while (nr_sectors > 1) {
+    //for (uint16_t i = 0; i < 512; i++) {
+     //   write_data(sector_buffer[offset+i]);
+    //}
+    //offset += 512;
+    //printf("%d ", x++);
+
+    while (nr > 1) {
         write_command(0x09);
-        for (uint16_t i = 0; i < 512; i++) {
-            write_data(sector_buffer[offset+i]);
+        chunk = 0;
+        while (chunk < 512) {
+            write_data_multiple(sector_buffer, 32);
+            sector_buffer += 32;
+            chunk += 32;
         }
         delay_ms(50);
-        offset += 512;
-        printf("Wrote sector %d\r\n", x++);
-        nr_sectors--;
+        printf("%d ", x++);
+
+        //for (uint16_t i = 0; i < 512; i++) {
+        //    write_data(sector_buffer[offset+i]);
+        //}
+        //offset += 512;
+        nr--;
     }
 
+    printf("\r\n");
     return true;
 }

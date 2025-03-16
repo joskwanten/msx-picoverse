@@ -16,6 +16,20 @@
         "span": "cpp",
         "sdcards.h": "c",
         "compare": "c",
-        "loadrom.h": "c"
+        "loadrom.h": "c",
+        "format": "c",
+        "random": "c",
+        "ranges": "c",
+        "type_traits": "c",
+        "vector": "c",
+        "*.tcc": "c",
+        "charconv": "c",
+        "optional": "c",
+        "ratio": "c",
+        "system_error": "c",
+        "functional": "c",
+        "regex": "c",
+        "tuple": "c",
+        "utility": "c"
     }
 }

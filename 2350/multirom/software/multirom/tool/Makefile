@@ -12,6 +12,7 @@ SOURCES = multirom.c
 OUTFILE = multirom.exe
 
 MSXMENU = ../msx/dist/menu.rom
+NEXTROM = ../nextor_c/dist/nextor.rom
 PICOBIN = ../pico/multirom/build/multirom.bin
 
 all: clean compile package
@@ -27,8 +28,9 @@ package:
 	cp $(BINDIR)/$(OUTFILE) $(DISDIR)/$(OUTFILE)
 	cp $(PICOBIN) $(BINDIR)/multirom.bin 
 	cp $(MSXMENU) $(BINDIR)/multirom.msx
+	cp $(NEXTROM) $(BINDIR)/multirom.nxt
 	cp $(PICOBIN) $(DISDIR)/multirom.bin 
-	cp $(MSXMENU) $(DISDIR)/multirom.msx
+	
 
 #	cp ../../tools/uf2conv.exe $(DISDIR)/uf2conv.exe
 

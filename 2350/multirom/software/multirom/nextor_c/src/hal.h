@@ -13,6 +13,9 @@ uint8_t getManufacturerID();
 uint32_t getSDCapacity();
 uint32_t getSDSerial();
 
+uint8_t read_8bit_value(uint16_t address);
+uint32_t read_32bit_value(uint16_t address);
+
 void    write_command (uint8_t command)  __z88dk_fastcall __naked;
 void    write_data (uint8_t data)  __z88dk_fastcall __naked;
 uint8_t read_data ()  __z88dk_fastcall __naked;

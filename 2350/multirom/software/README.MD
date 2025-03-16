@@ -16,7 +16,7 @@ This page summarizes the software options currently available or in development 
 
 ### [loadrom](loadrom/)
 
-This is a firmware to load a single ROM image (up to 10MB) from the flash memory of the PICO 2350 board. The ROM image is read directly from the flash memory and then executed. At this moment the tool can load and execute ROMs of the following types:
+This is a firmware to load a single ROM image from the flash memory of the PICO 2350 board. The ROM image is read directly from the flash memory and then executed. At this moment the tool can load and execute ROMs of the following types:
 
 * Plain16  
 * Plain32  
@@ -56,3 +56,8 @@ To use it you need to run the multirom.exe tool in the same folder as the ROM fi
 multirom.exe
 ```
 Then connect your cartridge to the PC via the USB-C cable and copy the multirom.uf2 file to the PICO board. The menu will be executed and you can select the ROM to be loaded to the MSX.
+
+### Nextor
+
+Multirom is compatible with Nextor. The first ROM available in the menu is a Nextor ROM and can be used to load Nextor OS and software directly from the microSD card connected to the cartridge. 
+

@@ -18,6 +18,7 @@
 #include "pico/multicore.h"
 #include "hardware/clocks.h"
 #include "hardware/structs/qmi.h"
+#include "hw_config.h"
 #include "multirom.h"
 #include "io.h"
 
@@ -458,6 +459,70 @@ void __no_inline_not_in_flash_func(loadrom_ascii16)(uint32_t offset)
     }
 }
 
+void __no_inline_not_in_flash_func(loadrom_nextor)(uint32_t offset)
+{
+    static uint8_t rom_sram[131072]; // Buffer for the ROM data (128KB) - TEST
+
+    //overclock to test performance gains
+    //qmi_hw->m[0].timing = 0x40000201; // Set the QMI timing for the MSX bus
+    //set_sys_clock_khz(150000, true);     // Set system clock to 285Mhz
+
+    //runs the IO code in the second core
+    //multicore_launch_core1(io_main);    // Launch core 1
+
+    //Test copying to RAM to check performance gains
+    gpio_init(PIN_WAIT); // Init wait signal pin
+    gpio_set_dir(PIN_WAIT, GPIO_OUT); // Set the WAIT signal as output
+    gpio_put(PIN_WAIT, 0); // Wait until we are ready to read the ROM
+    memset(rom_sram, 0, 131072); // Clear the SRAM buffer
+    memcpy(rom_sram, rom + offset, 131072); //for 32KB ROMs we start at 0x4000
+    gpio_put(PIN_WAIT, 1); // Lets go!
+
+    uint8_t bank_registers[2] = {0, 1}; // Initial banks 0 and 1 mapped
+
+    gpio_set_dir_in_masked(0xFF << 16);
+    while (true) {
+        // Check control signals
+        bool sltsl = !(gpio_get(PIN_SLTSL)); // Slot selected (active low)
+        bool rd = !(gpio_get(PIN_RD));       // Read cycle (active low)
+        bool wr = !(gpio_get(PIN_WR));       // Write cycle (active low)
+
+        if (sltsl) {
+            uint16_t addr = gpio_get_all() & 0x00FFFF; // Read the address bus
+            if (addr >= 0x4000 && addr <= 0xBFFF)  
+            {
+                if (rd) {
+                    gpio_set_dir_out_masked(0xFF << 16); // Set data bus to output mode
+                    //uint32_t rom_offset = offset + (bank_registers[(addr >> 15) & 1] << 14) + (addr & 0x3FFF);
+                    //gpio_put_masked(0xFF0000, rom[rom_offset] << 16); // Write the data to the data bus
+                    //Sram - Tests
+                    uint32_t rom_offset = (bank_registers[(addr >> 15) & 1] << 14) + (addr & 0x3FFF);
+                    gpio_put_masked(0xFF0000, rom_sram[rom_offset] << 16); // Write the data to the data bus
+
+                    while (!(gpio_get(PIN_RD)))  // Wait for the read cycle to complete
+                    {
+                        tight_loop_contents();
+                    }
+                    gpio_set_dir_in_masked(0xFF << 16); // Return data bus to input mode after the read cycle
+                }
+                else if (wr) 
+                {
+                    // Update bank registers based on the specific switching addresses
+                    if ((addr >= 0x6000) && (addr <= 0x67FF)) {
+                        bank_registers[0] = (gpio_get_all() >> 16) & 0xFF;
+                    } else if (addr >= 0x7000 && addr <= 0x77FF) {
+                        bank_registers[1] = (gpio_get_all() >> 16) & 0xFF;
+                    }
+                    while (!(gpio_get(PIN_WR))) {
+                        tight_loop_contents();
+                    }
+                }
+            }
+        }
+    }
+}
+
+
 // loadrom_neo8 - Load an NEO8 ROM into the MSX directly from the pico flash
 // The NEO8 ROM is divided into 8KB segments, managed by a memory mapper that allows dynamic switching of these segments into the MSX's address space
 // Size of a segment: 8 KB
@@ -698,7 +763,9 @@ void __no_inline_not_in_flash_func(loadrom_neo16)(uint32_t offset)
 // Main function running on core 0
 int __no_inline_not_in_flash_func(main)()
 {
-   
+    qmi_hw->m[0].timing = 0x40000201; // Set the QMI timing for the MSX bus
+    set_sys_clock_khz(210000, true);     // Set system clock to 285Mhz
+
     stdio_init_all();     // Initialize stdio
     setup_gpio();     // Initialize GPIO
 
@@ -708,6 +775,7 @@ int __no_inline_not_in_flash_func(main)()
 
     // Load the selected ROM into the MSX according to the mapper
     switch (records[rom_index].Mapper) {
+       
         case 1:
         case 2:
             loadrom_plain32(records[rom_index].Offset);
@@ -732,6 +800,9 @@ int __no_inline_not_in_flash_func(main)()
             break;
         case 9:
             loadrom_neo16(records[rom_index].Offset); 
+            break;
+        case 10:
+            loadrom_nextor(records[rom_index].Offset);
             break;
         default:
             printf("Debug: Unsupported ROM mapper: %d\n", records[rom_index].Mapper);

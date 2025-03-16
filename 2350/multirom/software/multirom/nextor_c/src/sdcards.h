@@ -36,5 +36,5 @@ const char* getManufacturerName(uint8_t id) {
                 return manufacturers[i].name;
     }
 
-    return "Unknown";
+    return "Generic";
 }  

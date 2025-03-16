@@ -190,7 +190,7 @@ void print_str_inverted(const char *str)
 
 char* mapper_description(int number) {
     // Array of strings for the descriptions
-    const char *descriptions[] = {"PL-16", "PL-32", "KonSCC", "Linear", "ASC-08", "ASC-16", "Konami","NEO-8","NEO-16"};	
+    const char *descriptions[] = {"PL-16", "PL-32", "KonSCC", "Linear", "ASC-08", "ASC-16", "Konami","NEO-8","NEO-16","NEXTOR"};	
     return descriptions[number - 1];
 }
 
@@ -302,7 +302,7 @@ void navigateMenu()
     {
         //debug
         Locate(0, 23);
-        //printf("Key: %3d", key);
+        printf("Key: %3d", key);
         printf("Size: %05lu/15872", totalSize/1024);
         //debug
         //Locate(20, 23);
@@ -353,6 +353,10 @@ void navigateMenu()
                     currentIndex = (currentPage-1) * FILES_PER_PAGE; // Move to the first file of the page
                     displayMenu(); // Display the menu
                 }
+                break;
+            case 27: // ESC
+                // load Nextor
+                loadGame(0); // Load the Nextor ROM
                 break;
             case 72: // H - Help (uppercase H)
             case 104: // h - Help (lowercase h)

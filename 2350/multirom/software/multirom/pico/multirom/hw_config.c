@@ -30,9 +30,10 @@ static spi_t spi = {
     .miso_gpio = 36,
     //.baud_rate = 125 * 1000 * 1000 / 8  // 15625000 Hz
     //.baud_rate = 125 * 1000 * 1000 / 6  // 20833333 Hz
-    .baud_rate = 125 * 1000 * 1000 / 4  // 31250000 Hz
+    .baud_rate = 125 * 1000 * 1000 / 4    // 31250000 Hz
     //.baud_rate = 125 * 1000 * 1000 / 2  // 62500000 Hz
-    //.baud_rate = 12 * 1000 * 1000   // Actual frequency: 10416666.
+    //.baud_rate = 12 * 1000 * 1000       // Actual frequency: 10416666.
+    //.baud_rate = 150 * 1000 * 1000 /2  // 75000000 Hz
 
 };
 

@@ -29,6 +29,7 @@
 #define CONFIG_FILE     "multirom.cfg"          // this is the 7424 (256 * 29) bytes file with the list of ROMs and their information
 #define COMBINED_FILE   "multirom.cmb"          // this is the final binary file with the firmware, menu and ROMs
 #define MENU_FILE       "multirom.msx"          // this is the 32KB MSX MENU ROM file
+#define NEXTOR_FILE     "multirom.nxt"          // this is the Nextor ROM file (128KB) to be appended to the final binary file
 #define PICOFIRMWARE    "multirom.bin"          // this is the Raspberry PI Pico firmware binary file
 #define UF2FILENAME     "multirom.uf2"          // this is the UF2 file to program the Raspberry Pi Pico
 
@@ -96,9 +97,6 @@ uint8_t detect_rom_type(const char *filename, uint32_t size) {
     // Define the NEO8 signature
     const char neo8_signature[] = "ROM_NEO8";
     const char neo16_signature[] = "ROM_NE16";
-
-    //printf("Detecting ROM type for [%s]\n", filename);
-    if (strcmp(filename, "nextor.rom") == 0) return 6; // Nextor ROM
 
     // Initialize weighted scores for different mapper types
     int konami_score = 0;
@@ -317,7 +315,7 @@ int main()
     size_t current_size = 0; // Current size of the output file
     int file_index = 1; // Index of the ROM file
     uint32_t FIRMWARE_BINARY_SIZE = file_size(PICOFIRMWARE); // Size of the PICO firmware binary file
-    uint32_t base_offset = TARGET_FILE_SIZE; // Base offset for the ROM files = 32KB MSX MENU
+    uint32_t base_offset = TARGET_FILE_SIZE; // Base offset for the ROM files = 32KB MSX MENU + 128KB NEXTOR ROM
     FileInfo files[256]; // Array to store file information
     int file_count = 0; // Number of ROM files processed
 
@@ -333,6 +331,40 @@ int main()
         printf("Failed to open directory!");
         fclose(output_file);
         return 1;
+    }
+
+    // Process Nextor ROM file
+    uint32_t nextor_size = file_size(NEXTOR_FILE);
+    if (nextor_size > 0) {
+        // Write the Nextor ROM file name (20 bytes)
+        char nextor_name[MAX_FILE_NAME_LENGTH] = "Nextor Driver 1.0";
+        fwrite(nextor_name, 1, MAX_FILE_NAME_LENGTH, output_file);
+        current_size += MAX_FILE_NAME_LENGTH;
+
+        // Write the mapper (1 byte)
+        uint8_t mapper_byte = 10; // Nextor ROM
+        fwrite(&mapper_byte, 1, 1, output_file);
+        current_size += 1;
+
+        // Write the file size (4 bytes)
+        fwrite(&nextor_size, 4, 1, output_file);
+        current_size += 4;
+
+        // Write the flash offset (4 bytes)
+        fwrite(&base_offset, 4, 1, output_file);
+        current_size += 4;
+
+        // Print file information
+        printf("File %02d: Name = %-20s, Size = %07u bytes, Flash Offset = 0x%08X, Mapper = %02d\n", file_index, nextor_name, nextor_size, base_offset, mapper_byte);
+
+        // Update base offset for the next file
+        base_offset += nextor_size;
+
+        // Store rom information
+        strncpy(files[file_count].file_name, "multirom.nxt", 12);
+        files[file_count].file_size = nextor_size;
+        file_count++;
+        file_index++;
     }
 
     // Process all rom files on the folder
@@ -478,11 +510,12 @@ int main()
 #endif
 
     // Append the content of each ROM file to the final output file in the same order
+    // includes the processed nextor file
     for (int i = 0; i < file_count; i++) {
         input_file = fopen(files[i].file_name, "rb");
         //printf("Appending ROM file %s to the final output file...\n", files[i].file_name);
         if (!input_file) {
-            printf("Failed to open ROM file");
+            printf("Failed to open ROM file\n");
             continue;
         }
 

@@ -7,7 +7,6 @@
 #include "driver.h"
 #include "sdcards.h"
 
-
 static workarea_t workarea;
 
 int putchar (int character)
@@ -81,39 +80,38 @@ uint16_t get_workarea_size (uint8_t reduced_drive_count,uint8_t nr_available_dri
     ;    (for drive-based drivers only. Device-based drivers always
     ;     get two allocated drives.)
 */
+
+
+
 void init_driver (uint8_t reduced_drive_count,uint8_t nr_allocated_drives)
 {
 
+    uint8_t st;
+    
     //workarea_t* workarea = get_workarea();
-
     printf("MSX PICOVERSE 2350\r\n");
     printf("The Retro Hacker (c) 2025\r\n");
     printf("Nextor Driver Version 1.0\r\n");
-
-    printf("\n\nCard: ");
-
-    write_command(0x01);
-    delay_ms(1000);
-    uint8_t sd_init = read_status();
-    if (sd_init==0x00)
-    {
-
-        // initializing the microSD card and filling the workarea with info
-        workarea.disk_change = true;
-        workarea.manufacturer_id = getManufacturerID();
-        workarea.manufacturer_name = getManufacturerName(workarea.manufacturer_id);
-        workarea.serial = getSDSerial();
-
-        printf("%s microSD\r\n",workarea.manufacturer_name);
-        
+    printf("\n\nInitializing:");
+    do {
+        printf(".");
+        write_command(0x01);
         delay_ms(1000);
+    } while (read_status() != 0x00);
+    
+    printf("OK\r\n");
+    printf("Detecting card: ");
+    delay_ms(1000);
+    
+    // initializing the microSD card and filling the workarea with info
+    workarea.disk_change = true;
+    workarea.manufacturer_id = getManufacturerID();
+    workarea.manufacturer_name = getManufacturerName(workarea.manufacturer_id);
+    workarea.serial = getSDSerial();
 
-    }
-    else
-    {
-        printf("Not detected!\r\n");
-        return;
-    }
+    printf("%s\r\n",workarea.manufacturer_name);
+        
+    delay_ms(1000);
 
 }
 
@@ -357,7 +355,6 @@ diskerror_t read_or_write_sector (uint8_t read_or_write_flag, uint8_t nr_device,
     if (nr_device!=1 || nr_lun!=1)
         return IDEVL;
 
-    //To be implemented
     if (!read_write_disk_sectors (read_or_write_flag & Z80_CARRY_MASK,nr_sectors,sector,sector_buffer))
     {
 

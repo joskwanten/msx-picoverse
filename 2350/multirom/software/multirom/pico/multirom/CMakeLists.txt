@@ -42,6 +42,8 @@ add_executable(multirom
 
 )
 
+#pico_generate_pio_header(multirom ${CMAKE_CURRENT_SOURCE_DIR}/io_9f_write_monitor.pio)
+#pico_generate_pio_header(multirom ${CMAKE_CURRENT_SOURCE_DIR}/io_9f_read_monitor.pio)
 
 add_subdirectory(lib/no-OS-FatFS-SD-SDIO-SPI-RPi-Pico/src build)
 
@@ -54,6 +56,8 @@ pico_enable_stdio_usb(multirom 1)
 
 # Add the standard library to the build
 target_link_libraries(multirom
+       # hardware_pio
+       # hardware_dma
         pico_stdlib
         no-OS-FatFS-SD-SDIO-SPI-RPi-Pico
         pico_multicore

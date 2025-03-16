@@ -1,6 +1,6 @@
 CPP = sdcc
 N80 = n80.exe
-SJASM = sjasmplus.exe
+SJASM = tools/sjasmplus.exe
 ASM = sdasz80
 MKNEXROM = mknexrom.exe
 HEX2BIN = hex2bin
@@ -31,6 +31,8 @@ $(BUILD_DIR)/hal.rel: $(SRC_DIR)/hal.c
 $(BUILD_DIR)/msxromcrt0.rel: $(SRC_DIR)/msxromcrt0.s
 	$(ASM) -o $@ $< 
 
+$(BUILD_DIR)/extra1k.dat: $(SRC_DIR)/extra1k.asm
+	$(SJASM) --fullpath --raw=$@ --sym=$(basename $@).sym --lst=$(basename $@).lst $<
 
 $(IHX): $(BUILD_DIR)/msxromcrt0.rel $(BUILD_DIR)/hal.rel $(BUILD_DIR)/driver.rel
 	$(CPP) -mz80 --code-loc $(ADDR_CODE) --data-loc $(ADDR_DATA) --no-std-crt0 -o $@ $^
@@ -39,16 +41,20 @@ $(BIN): $(IHX)
 	@echo "Building driver ROM..."
 	$(HEX2BIN) -l 3fd0 -e rom $<
 
-$(NEXTOR_ROM): $(BIN) 
+$(NEXTOR_ROM): $(BIN) $(BUILD_DIR)/extra1k.dat
+
 	@echo "Building Nextor ROM..."
-	$(TOOLS_DIR)/$(MKNEXROM) $(NEXTOR_BASE) $@ /d:$(BIN)
+	$(TOOLS_DIR)/$(MKNEXROM) $(NEXTOR_BASE) $@ /d:$(BIN) /e:$(BUILD_DIR)/extra1k.dat
 
 package:
 	@echo "Creating package..."
-	@cp $(NEXTOR_ROM) ../tool/build/nextor.rom
+#   @cp $(NEXTOR_ROM) ../tool/build/nextor.rom
+#	@cp $(NEXTOR_ROM) ../tool/build/multirom.nxt
 	@cp $(NEXTOR_ROM) $(DIST_DIR)/nextor.rom
 
 clean:
 	@echo "Cleaning..."
 	@rm -f $(BUILD_DIR)/driver.* $(BUILD_DIR)/nextor.rom $(BUILD_DIR)/msxromcrt0.rel $(BUILD_DIR)/hal.*
 	@rm -f $(DIST_DIR)/nextor.rom 
+	@rm -f $(IHX) $(BIN)
+#	@rm -f ../tool/build/multirom.nxt ../tool/dist/multirom.nxt 
