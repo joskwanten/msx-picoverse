@@ -468,7 +468,7 @@ void __no_inline_not_in_flash_func(loadrom_nextor)(uint32_t offset)
     //set_sys_clock_khz(150000, true);     // Set system clock to 285Mhz
 
     //runs the IO code in the second core
-    //multicore_launch_core1(io_main);    // Launch core 1
+    multicore_launch_core1(io_main);    // Launch core 1
 
     //Test copying to RAM to check performance gains
     gpio_init(PIN_WAIT); // Init wait signal pin
@@ -769,7 +769,7 @@ int __no_inline_not_in_flash_func(main)()
     stdio_init_all();     // Initialize stdio
     setup_gpio();     // Initialize GPIO
 
-    multicore_launch_core1(io_main);    // Launch core 1
+    //multicore_launch_core1(io_main);    // Launch core 1
 
     int rom_index = loadrom_msx_menu(0x0000); //load the first 32KB ROM into the MSX (The MSX PICOVERSE MENU)
 
