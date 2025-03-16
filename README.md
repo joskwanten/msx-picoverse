@@ -71,6 +71,10 @@ As this was the first cartridge to be developed, there are a few software option
 
 The main software for the PicoVerse 2040 cartridge is [MultiRom](2040/software/multirom). This software offers the following features:
 
+|Menu - Page1|Menu - Page2|
+|---|---|
+|![alt text](/images/Multirom1.png)|![alt text](/images/Multirom2.png)|
+
 * A PC tool to collect all ROM files in the current folder and create a UF2 file that can be used to program the PICO board.
 * When the cartridge is inserted into the MSX computer, it offers a menu to select the ROM to boot.
 * Support for loading ROMs from the cartridge flash up to 16MB in the following mapper formats:
@@ -93,10 +97,14 @@ The software for the PicoVerse 2350 Multirom Cartridge is being developed. You c
 
 The main software for the PicoVerse 2350 cartridge is [MultiRom](2350/software/multirom). This software offers the following features:
 
+|Main Menu|Nextor 1|Nextor 2|
+|---|---|---|
+|![alt text](/images/2025-03-16-13-28-04.png)|![alt text](/images/2025-03-16-13-31-58.png)|![alt text](/images/2025-03-16-13-31-32.png)|
+
 * A PC tool to collect all ROM files in the current folder and create a UF2 file that can be used to program the PICO board.
 * When the cartridge is inserted into the MSX computer, it offers a menu to select the ROM to boot.
-* Nextor support for loading and saving files to the microSD card. Nextor is the first option available on the menu.
-* Support for loading ROMs up to 16MB directly from the cartridge flash in the following mapper formats:
+* Nextor support for loading and saving files to the microSD card. Nextor is the first option available on the menu. You can use that option to run Nextor OS and SofaRun.
+* Support for loading MSX ROMs up to 16MB directly from the cartridge flash in the following mapper formats:
   * Plain16  
   * Plain32  
   * Linear0  
