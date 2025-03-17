@@ -730,151 +730,6 @@
 				)
 			)
 		)
-		(symbol "Jumper:Jumper_2_Open"
-			(pin_numbers hide)
-			(pin_names
-				(offset 0) hide)
-			(exclude_from_sim yes)
-			(in_bom yes)
-			(on_board yes)
-			(property "Reference" "JP"
-				(at 0 2.794 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Value" "Jumper_2_Open"
-				(at 0 -2.286 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Footprint" ""
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "Datasheet" "~"
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "Description" "Jumper, 2-pole, open"
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "ki_keywords" "Jumper SPST"
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "ki_fp_filters" "Jumper* TestPoint*2Pads* TestPoint*Bridge*"
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(symbol "Jumper_2_Open_0_0"
-				(circle
-					(center -2.032 0)
-					(radius 0.508)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(circle
-					(center 2.032 0)
-					(radius 0.508)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-			)
-			(symbol "Jumper_2_Open_0_1"
-				(arc
-					(start 1.524 1.27)
-					(mid 0 1.778)
-					(end -1.524 1.27)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-			)
-			(symbol "Jumper_2_Open_1_1"
-				(pin passive line
-					(at -5.08 0 0)
-					(length 2.54)
-					(name "A"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "1"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin passive line
-					(at 5.08 0 180)
-					(length 2.54)
-					(name "B"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "2"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-			)
-		)
 		(symbol "RP2040-PURPLE:RP2040-PURPLE"
 			(exclude_from_sim no)
 			(in_bom yes)
@@ -3422,12 +3277,6 @@
 		(uuid "3fd38725-d83f-444b-b6f0-124f8b57c7d1")
 	)
 	(junction
-		(at 312.42 110.49)
-		(diameter 0)
-		(color 0 0 0 0)
-		(uuid "40d0c863-5881-4cf2-8d79-5bcd7783bc69")
-	)
-	(junction
 		(at 328.93 76.2)
 		(diameter 0)
 		(color 0 0 0 0)
@@ -3612,6 +3461,10 @@
 	(no_connect
 		(at 110.49 127)
 		(uuid "a7f5d65f-a163-488f-bcdc-1e1f11362a3d")
+	)
+	(no_connect
+		(at 317.5 127)
+		(uuid "b8a02b11-d69b-4a9e-83f0-6ee11d8b59c8")
 	)
 	(no_connect
 		(at 110.49 172.72)
@@ -3963,16 +3816,6 @@
 	)
 	(wire
 		(pts
-			(xy 317.5 110.49) (xy 312.42 110.49)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "6c55b9bd-49cc-4148-865b-879fbb95bbf8")
-	)
-	(wire
-		(pts
 			(xy 138.43 179.07) (xy 138.43 191.77)
 		)
 		(stroke
@@ -4080,16 +3923,6 @@
 			(type default)
 		)
 		(uuid "7ee39a67-b2d7-42df-8d9c-412e35d16c6b")
-	)
-	(wire
-		(pts
-			(xy 317.5 123.19) (xy 317.5 127)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "802d5542-774b-4165-972e-b4adcb4f29b0")
 	)
 	(wire
 		(pts
@@ -4210,26 +4043,6 @@
 			(type default)
 		)
 		(uuid "a2cfdcbe-05d1-4221-b412-585b013d4cb9")
-	)
-	(wire
-		(pts
-			(xy 312.42 110.49) (xy 312.42 127)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "a40a98ec-ad55-478e-90ce-39598f85dff6")
-	)
-	(wire
-		(pts
-			(xy 317.5 113.03) (xy 317.5 110.49)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "a5241319-d717-4e75-96e0-ed4cdacf27be")
 	)
 	(wire
 		(pts
@@ -4423,7 +4236,7 @@
 	)
 	(wire
 		(pts
-			(xy 312.42 100.33) (xy 312.42 110.49)
+			(xy 312.42 100.33) (xy 312.42 127)
 		)
 		(stroke
 			(width 0)
@@ -8117,76 +7930,6 @@
 			(project "msx-picoverse"
 				(path "/85986c19-ca47-44de-9ad3-96b5b9f34f81"
 					(reference "C1")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Jumper:Jumper_2_Open")
-		(at 317.5 118.11 90)
-		(unit 1)
-		(exclude_from_sim yes)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "f6657ec9-6e9c-409d-a5e4-f54e67a61dc3")
-		(property "Reference" "JP1"
-			(at 318.77 116.8399 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify right)
-			)
-		)
-		(property "Value" "Jumper_2_Open"
-			(at 318.77 119.3799 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify right)
-			)
-		)
-		(property "Footprint" "Jumper:SolderJumper-2_P1.3mm_Open_RoundedPad1.0x1.5mm"
-			(at 317.5 118.11 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" "~"
-			(at 317.5 118.11 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "Jumper, 2-pole, open"
-			(at 317.5 118.11 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "08ff41de-c32e-43b9-bc02-573fb57aa8ad")
-		)
-		(pin "2"
-			(uuid "1d4da56a-227e-4e3f-a72d-0c99f7a8f3a2")
-		)
-		(instances
-			(project "msx-picoverse"
-				(path "/85986c19-ca47-44de-9ad3-96b5b9f34f81"
-					(reference "JP1")
 					(unit 1)
 				)
 			)
