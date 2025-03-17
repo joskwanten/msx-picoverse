@@ -18,6 +18,7 @@
 #include "pico/multicore.h"
 #include "hardware/clocks.h"
 #include "multirom.h"
+#include "wireless.h"
 
 // config area and buffer for the ROM data
 #define MONITOR_ADDR    0x9D01     // Monitor ROM address - Configuration binary 0x8000+(ROM_RECORD_SIZE*MAX_ROM_RECORDS)+1 = 0x8000 +0x1D00 + 0x1 = 0x9D01
@@ -83,7 +84,6 @@ static inline void setup_gpio()
     gpio_init(PIN_WR); gpio_set_dir(PIN_WR, GPIO_IN);
     gpio_init(PIN_IORQ); gpio_set_dir(PIN_IORQ, GPIO_IN);
     gpio_init(PIN_SLTSL); gpio_set_dir(PIN_SLTSL, GPIO_IN);
-    gpio_init(PIN_BUSSDIR); gpio_set_dir(PIN_BUSSDIR, GPIO_IN);
 }
 
 // read_ulong - Read a 4-byte value from the memory area
@@ -705,6 +705,9 @@ int main()
     stdio_init_all();     // Initialize stdio
     setup_gpio();     // Initialize GPIO
 
+    // Multicore setup
+    multicore_launch_core1(wireless_main); // Launch core 1
+    // Load the ROM data from flash memory
     int rom_index = loadrom_msx_menu(0x0000); //load the first 32KB ROM into the MSX (The MSX PICOVERSE MENU)
 
     // Load the selected ROM into the MSX according to the mapper

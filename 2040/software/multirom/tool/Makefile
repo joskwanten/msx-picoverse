@@ -5,14 +5,15 @@ BINDIR = build
 DISDIR = dist
 
 VERBOSE = --verbose
-CCFLAGS = -g -DDEBUG
-#CFLAGS = -g 
+#CCFLAGS = -g -DDEBUG
+CFLAGS = -g 
 
 SOURCES = multirom.c
 OUTFILE = multirom.exe
 
 MSXMENU = ../msx/dist/menu.rom
 PICOBIN = ../pico/multirom/build/multirom.bin
+ESPPROM = ../wireless/dist/ESP8266P.ROM
 
 all: clean compile package
 
@@ -29,6 +30,8 @@ package:
 	cp $(MSXMENU) $(BINDIR)/multirom.msx
 	cp $(PICOBIN) $(DISDIR)/multirom.bin 
 	cp $(MSXMENU) $(DISDIR)/multirom.msx
+	cp $(ESPPROM) $(BINDIR)/ESP8266P.ROM
+	cp $(ESPPROM) $(DISDIR)/ESP8266P.ROM
 
 #	cp ../../tools/uf2conv.exe $(DISDIR)/uf2conv.exe
 

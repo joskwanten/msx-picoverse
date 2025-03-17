@@ -15,9 +15,9 @@ if(WIN32)
 else()
     set(USERHOME $ENV{HOME})
 endif()
-set(sdkVersion 2.1.0)
-set(toolchainVersion 13_3_Rel1)
-set(picotoolVersion 2.1.0)
+set(sdkVersion 2.1.1)
+set(toolchainVersion 14_2_Rel1)
+set(picotoolVersion 2.1.1)
 set(picoVscode ${USERHOME}/.pico-sdk/cmake/pico-vscode.cmake)
 if (EXISTS ${picoVscode})
     include(${picoVscode})
@@ -28,29 +28,30 @@ set(PICO_BOARD pico CACHE STRING "Board type")
 # Pull in Raspberry Pi Pico SDK (must be before project)
 include(pico_sdk_import.cmake)
 
-project(multirom C CXX ASM)
+project(uarttest C CXX ASM)
 
 # Initialise the Raspberry Pi Pico SDK
 pico_sdk_init()
 
 # Add executable. Default name is the project name, version 0.1
 
-add_executable(multirom multirom.c wireless.c)
+add_executable(uarttest uarttest.c )
 
-pico_set_program_name(multirom "multirom")
-pico_set_program_version(multirom "0.1")
+pico_set_program_name(uarttest "uarttest")
+pico_set_program_version(uarttest "0.1")
 
 # Modify the below lines to enable/disable output over UART/USB
-pico_enable_stdio_uart(multirom 0)
-pico_enable_stdio_usb(multirom 1)
+pico_enable_stdio_uart(uarttest 0)
+pico_enable_stdio_usb(uarttest 1)
 
 # Add the standard library to the build
-target_link_libraries(multirom pico_stdlib pico_multicore)
+target_link_libraries(uarttest
+        pico_stdlib)
 
 # Add the standard include files to the build
-target_include_directories(multirom PRIVATE
-  ${CMAKE_CURRENT_LIST_DIR}
+target_include_directories(uarttest PRIVATE
+        ${CMAKE_CURRENT_LIST_DIR}
 )
 
-pico_add_extra_outputs(multirom)
+pico_add_extra_outputs(uarttest)
 

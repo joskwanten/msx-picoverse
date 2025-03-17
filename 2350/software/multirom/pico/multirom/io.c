@@ -25,7 +25,7 @@ void __not_in_flash_func(io_main)(){
     while (true) {
 
         bool iorq  = !gpio_get(PIN_IORQ);
-        bool sltsl = !gpio_get(PIN_SLTSL);
+        //bool sltsl = !gpio_get(PIN_SLTSL);
         if (iorq)
         { 
             uint32_t gpiostates = gpio_get_all();

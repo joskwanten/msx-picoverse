@@ -44,8 +44,10 @@
 #define PIN_WR     25   // Write strobe from MSX
 #define PIN_IORQ   26   // IO Request line from MSX
 #define PIN_SLTSL  27   // Slot Select for this cartridge slot
-#define PIN_WAIT    28  // WAIT line to MSX 
-#define PIN_BUSSDIR 29  // Bus direction line to MSX
+
+//28 and 29 are used for UART
+//28 - UART0 TX
+//29 - UART0 RX
 
 static inline void setup_gpio();
 unsigned long read_ulong(const unsigned char *ptr);
