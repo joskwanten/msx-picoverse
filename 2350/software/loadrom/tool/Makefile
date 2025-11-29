@@ -8,7 +8,7 @@ VERBOSE = --verbose
 CCFLAGS = -g 
 
 SOURCES = loadrom.c
-OUTFILE = loadrom.exe
+OUTFILE = loadrom
 
 PICOBIN = ../pico/loadrom/dist/loadrom.bin
 

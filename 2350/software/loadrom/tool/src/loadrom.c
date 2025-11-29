@@ -17,6 +17,7 @@
 // This work is licensed  under a "Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License. 
 // https://creativecommons.org/licenses/by-nc-sa/4.0/
 
+#include <string.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -236,6 +237,8 @@ uint8_t detect_rom_type(const char *filename, uint32_t size) {
         return 0; // unknown mapper
     }
    
+
+    return 0;
 }
 
 // create_uf2_file - Create the UF2 file
