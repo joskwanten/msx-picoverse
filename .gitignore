@@ -25,3 +25,5 @@ _autosave-*
 *.dsn
 *.ses
 .DS_Store
+2350/software/loadrom/tool/dist/loadrom.cmb
+2350/software/loadrom/tool/dist/loadrom.uf2
